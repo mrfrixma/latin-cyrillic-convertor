@@ -153,10 +153,14 @@
         <button class="ctrl-btn" id="copyOut" title="Copy output">Copy</button>
         <button class="ctrl-btn" id="downloadOut" title="Download output">Download</button>
         <button class="ctrl-btn primary" id="swapRow" title="Swap">Swap</button>
+
+        <!-- NEW: Convert button -->
+        <button class="ctrl-btn primary" id="convertBtn" title="Convert input to selected output">Convert</button>
+
         <input type="file" id="fileInput" accept=".txt" style="display:none" aria-hidden="true">
       </div>
 
-      <div style="color:var(--muted);font-size:13px">Tip: Ctrl+Enter → To Cyrillic · Shift+Enter → To Latin</div>
+      <div style="color:var(--muted);font-size:13px">Tip: Ctrl+Enter → To Cyrillic · Shift+Enter → To Latin · Or press Convert</div>
     </div>
 
     <!-- Panels -->
@@ -192,6 +196,7 @@
     const downloadBtn = document.getElementById('downloadOut');
     const swapTop = document.getElementById('swapTop');
     const swapRow = document.getElementById('swapRow');
+    const convertBtn = document.getElementById('convertBtn');
     const inputLabel = document.getElementById('inputLabel');
     const outputLabel = document.getElementById('outputLabel');
     const inputBadge = document.getElementById('inputBadge');
@@ -204,7 +209,7 @@
     // Mappings (digraphs first)
     const LATIN_TO_CYR = [
       ["oʻ","ў"],["o'","ў"],["oʼ","ў"],
-      ["gʻ","Ғ"],["g'","Ғ"],["gʼ","Ғ"],
+      ["gʻ","ғ"],["g'","ғ"],["gʼ","ғ"],
       ["sh","ш"],["ch","ч"],["ng","нг"],
       ["yo","ё"],["yu","ю"],["ya","я"],
       ["zh","ж"],["ts","ц"],
@@ -275,6 +280,20 @@
       const outLabel = outputLabel.textContent;
       setBadges(outLabel, inLabel);
     }
+
+    // NEW: Convert button behavior
+    convertBtn.addEventListener('click', ()=>{
+      // If input currently set to Latin, convert to Cyrillic; otherwise convert to Latin.
+      if(inputLabel.textContent === 'Latin'){
+        convertToCyrillic();
+      }else{
+        convertToLatin();
+      }
+      // give small feedback on the button
+      const prev = convertBtn.textContent;
+      convertBtn.textContent = 'Done ✓';
+      setTimeout(()=> convertBtn.textContent = prev, 900);
+    });
 
     // File upload
     uploadBtn.addEventListener('click', ()=> fileInput.click());
