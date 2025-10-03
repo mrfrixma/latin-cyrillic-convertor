@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Latin ⇄ Cyrillic — RisUzbek</title>
+ <link rel="icon" type="image/x-icon" href="logo.png">
+<style>
+  :root{
+    /* Light theme (default) */
+    --bg-body: #f6f8fb;
+    --panel-bg: #ffffff;
+    --muted: #6b7280;
+    --text: #0f1724;
+    --primary: #2563eb;
+    --accent: #06b6d4;
+    --glass: rgba(15,23,36,0.04);
+    --radius:12px;
+    --shadow: 0 10px 30px rgba(15,23,42,0.06);
+    --pattern-opacity: 0.06;
+  }
+
+  /* Dark theme variables (overrides) */
+  .theme-dark{
+    --bg-body: linear-gradient(180deg,#07142a,#041028);
+    --panel-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    --muted: #98a0aa;
+    --text: #e6eef8;
+    --primary: #2563eb;
+    --accent: #06b6d4;
+    --glass: rgba(255,255,255,0.04);
+    --shadow: 0 14px 40px rgba(2,6,23,0.45);
+    --pattern-opacity: 0.6;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    background: var(--bg-body);
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* subtle pattern overlay */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image: radial-gradient(rgba(0,0,0,var(--pattern-opacity)) 1px, transparent 1px);
+    background-size:14px 14px;
+    pointer-events:none;
+    opacity:0.25;
+    mix-blend-mode:overlay;
+  }
+
+  .shell{width:100%;max-width:1100px;display:flex;flex-direction:column;gap:18px}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .leftgroup{display:flex;gap:12px;align-items:center}
+  .logo{
+    width:46px;height:46px;border-radius:10px;
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+    display:inline-flex;align-items:center;justify-content:center;color:white;
+    font-weight:700;font-size:16px;box-shadow:var(--shadow);
+  }
+  .brand h1{margin:0;font-size:16px}
+  .brand p{margin:0;font-size:13px;color:var(--muted)}
+
+  .lang-indicators{display:flex;gap:10px;align-items:center;font-size:13px}
+  .badge{
+    background:rgba(0,0,0,0.03);padding:8px 10px;border-radius:10px;font-weight:600;
+    display:inline-flex;gap:8px;align-items:center;color:var(--text)
+  }
+  .badge.active{box-shadow:0 6px 18px rgba(37,99,235,0.08);border:1px solid rgba(0,0,0,0.04)}
+
+  .action-row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .ctrl-btn{
+    background:var(--panel-bg); color:var(--text); padding:10px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);
+    cursor:pointer;display:inline-flex;gap:8px;align-items:center;font-weight:600;
+  }
+  .ctrl-btn.primary{
+    background:linear-gradient(90deg,var(--primary),var(--accent));
+    color:white;border:none;box-shadow:0 8px 24px rgba(37,99,235,0.12);
+  }
+
+  .theme-toggle{
+    padding:8px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:var(--panel-bg);cursor:pointer;font-weight:600;
+  }
+
+  .main{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .card{
+    background:var(--panel-bg);border-radius:12px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;
+  }
+
+  label{color:var(--muted);font-size:13px;margin-bottom:6px}
+
+  textarea{
+    width:100%;min-height:220px;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);font-size:15px;line-height:1.5;
+    resize:vertical;background:transparent;color:var(--text);outline:none;
+  }
+  textarea[readonly]{opacity:0.95}
+
+  .card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:13px;color:var(--muted)}
+  .card-footer a{color:var(--muted);text-decoration:none;font-weight:600}
+
+  /* Responsiveness */
+  @media(max-width:880px){
+    .main{grid-template-columns:1fr}
+    textarea{min-height:160px}
+    .topbar{flex-direction:column;align-items:stretch;gap:12px}
+    .action-row{flex-direction:column;gap:8px}
+  }
+</style>
+</head>
+<body>
+  <div class="shell" id="app">
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="leftgroup">
+        <button id="swapTop" class="ctrl-btn" title="Swap input & output" aria-label="Swap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M4 7h13M4 17h13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 7l-3 3 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Swap
+        </button>
+
+        <div class="logo" aria-hidden>Rz</div>
+        <div class="brand" role="heading" aria-level="1">
+          <h1>Latin ⇄ Cyrillic</h1>
+          <p class="lead">Simple Uzbek converter — RisUzbek</p>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="lang-indicators" aria-hidden>
+          <div id="inputBadge" class="badge active">Input: <strong id="inputLang" style="margin-left:6px">Latin</strong></div>
+          <div id="outputBadge" class="badge">Output: <strong id="outputLang" style="margin-left:6px">Cyrillic</strong></div>
+        </div>
+
+        <button id="themeToggle" class="theme-toggle" aria-pressed="false" title="Toggle theme">Dark</button>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-row">
+      <div class="controls" role="toolbar" aria-label="controls">
+        <button class="ctrl-btn" id="uploadBtn" title="Upload .txt">Upload</button>
+        <button class="ctrl-btn" id="copyOut" title="Copy output">Copy</button>
+        <button class="ctrl-btn" id="downloadOut" title="Download output">Download</button>
+        <button class="ctrl-btn primary" id="swapRow" title="Swap">Swap</button>
+        <input type="file" id="fileInput" accept=".txt" style="display:none" aria-hidden="true">
+      </div>
+
+      <div style="color:var(--muted);font-size:13px">Tip: Ctrl+Enter → To Cyrillic · Shift+Enter → To Latin</div>
+    </div>
+
+    <!-- Panels -->
+    <div class="main" role="region" aria-label="converter panels">
+      <div class="card" id="leftCard">
+        <label for="inputText">Input (<span id="inputLabel">Latin</span>)</label>
+        <textarea id="inputText" placeholder="Type or paste text here..."></textarea>
+        <div class="card-footer">
+          <div style="color:var(--muted)">You can paste text or upload a .txt file</div>
+          <div style="color:var(--muted);font-size:13px">Made with care · RisUzbek</div>
+        </div>
+      </div>
+
+      <div class="card" id="rightCard">
+        <label for="outputText">Output (<span id="outputLabel">Cyrillic</span>)</label>
+        <textarea id="outputText" placeholder="Result..." readonly></textarea>
+        <div class="card-footer">
+          <a href="https://t.me/RisUzbek_developments" target="_blank" rel="noopener noreferrer">https://t.me/RisUzbek_developments</a>
+          <div style="color:var(--muted);font-size:13px">Result preserves case where possible</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  (function(){
+    // DOM refs
+    const inputEl = document.getElementById('inputText');
+    const outputEl = document.getElementById('outputText');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const copyBtn = document.getElementById('copyOut');
+    const downloadBtn = document.getElementById('downloadOut');
+    const swapTop = document.getElementById('swapTop');
+    const swapRow = document.getElementById('swapRow');
+    const inputLabel = document.getElementById('inputLabel');
+    const outputLabel = document.getElementById('outputLabel');
+    const inputBadge = document.getElementById('inputBadge');
+    const outputBadge = document.getElementById('outputBadge');
+    const inputLang = document.getElementById('inputLang');
+    const outputLang = document.getElementById('outputLang');
+    const themeToggle = document.getElementById('themeToggle');
+    const app = document.getElementById('app');
+
+    // Mappings (digraphs first)
+    const LATIN_TO_CYR = [
+      ["oʻ","ў"],["o'","ў"],["oʼ","ў"],
+      ["gʻ","Ғ"],["g'","Ғ"],["gʼ","Ғ"],
+      ["sh","ш"],["ch","ч"],["ng","нг"],
+      ["yo","ё"],["yu","ю"],["ya","я"],
+      ["zh","ж"],["ts","ц"],
+      ["a","а"],["b","б"],["d","д"],["e","е"],["f","ф"],["g","г"],
+      ["h","ҳ"],["i","и"],["j","ж"],["k","к"],["l","л"],["m","м"],
+      ["n","н"],["o","о"],["p","п"],["q","қ"],["r","р"],["s","с"],
+      ["t","т"],["u","у"],["v","в"],["x","х"],["y","й"],["z","з"]
+    ];
+
+    const CYR_TO_LAT = [
+      ["нг","ng"],
+      ["ё","yo"],["ю","yu"],["я","ya"],["ж","zh"],["ч","ch"],["ш","sh"],
+      ["ў","oʻ"],["ғ","gʻ"],["ц","ts"],
+      ["а","a"],["б","b"],["д","d"],["е","e"],["ф","f"],["г","g"],
+      ["ҳ","h"],["и","i"],["к","k"],["л","l"],["м","m"],["н","n"],
+      ["о","o"],["п","p"],["қ","q"],["р","r"],["с","s"],["т","t"],
+      ["у","u"],["в","v"],["х","x"],["й","y"],["з","z"]
+    ];
+
+    // Case preservation helper
+    function preserveCase(matched, repl){
+      // All uppercase
+      if(matched === matched.toUpperCase()) return repl.toUpperCase();
+      // Title case (first letter uppercase)
+      if(matched[0] === matched[0].toUpperCase()) return repl.charAt(0).toUpperCase() + repl.slice(1);
+      return repl;
+    }
+
+    function replaceAllPairs(text, pairs){
+      let out = text;
+      for(const [from, to] of pairs){
+        const pattern = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp(pattern, "gi");
+        out = out.replace(re, (m)=> preserveCase(m, to));
+      }
+      return out;
+    }
+
+    function convertToCyrillic(){
+      const t = inputEl.value || '';
+      const res = replaceAllPairs(t, LATIN_TO_CYR);
+      outputEl.value = res;
+      setBadges('Latin','Cyrillic');
+    }
+
+    function convertToLatin(){
+      const t = inputEl.value || '';
+      const res = replaceAllPairs(t, CYR_TO_LAT);
+      outputEl.value = res;
+      setBadges('Cyrillic','Latin');
+    }
+
+    function setBadges(inLang, outLang){
+      inputLabel.textContent = inLang;
+      outputLabel.textContent = outLang;
+      inputLang.textContent = inLang;
+      outputLang.textContent = outLang;
+      inputBadge.classList.toggle('active', inLang === 'Latin');
+      outputBadge.classList.toggle('active', outLang === 'Cyrillic');
+    }
+
+    function swapAreas(){
+      const tmp = inputEl.value;
+      inputEl.value = outputEl.value;
+      outputEl.value = tmp;
+      // swap labels
+      const inLabel = inputLabel.textContent;
+      const outLabel = outputLabel.textContent;
+      setBadges(outLabel, inLabel);
+    }
+
+    // File upload
+    uploadBtn.addEventListener('click', ()=> fileInput.click());
+    fileInput.addEventListener('change', (ev)=>{
+      const f = ev.target.files && ev.target.files[0];
+      if(!f) return;
+      const r = new FileReader();
+      r.onload = e => { inputEl.value = e.target.result || ''; };
+      r.readAsText(f, 'utf-8');
+      ev.target.value = '';
+    });
+
+    // Copy output
+    copyBtn.addEventListener('click', async ()=>{
+      const out = outputEl.value;
+      if(!out) return alert('Nothing to copy.');
+      try{
+        await navigator.clipboard.writeText(out);
+        const prev = copyBtn.textContent;
+        copyBtn.textContent = 'Copied ✓';
+        setTimeout(()=> copyBtn.textContent = prev, 1200);
+      }catch(e){ alert('Copy failed — select and copy manually.'); }
+    });
+
+    // Download output
+    downloadBtn.addEventListener('click', ()=>{
+      const out = outputEl.value;
+      if(!out) return alert('Nothing to download.');
+      const blob = new Blob([out], {type:'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'risuzbek-conversion.txt';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // Swap handlers
+    swapTop.addEventListener('click', swapAreas);
+    swapRow.addEventListener('click', swapAreas);
+
+    // Keyboard shortcuts
+    inputEl.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' && e.ctrlKey){ e.preventDefault(); convertToCyrillic(); }
+      else if(e.key === 'Enter' && e.shiftKey){ e.preventDefault(); convertToLatin(); }
+    });
+
+    // Click output to select
+    outputEl.addEventListener('click', function(){ this.select(); });
+
+    // Theme toggle (default: light). persist in localStorage
+    const THEME_KEY = 'risuzbek_theme';
+    function applyTheme(theme){
+      if(theme === 'dark'){
+        document.documentElement.classList.add('theme-dark');
+        themeToggle.textContent = 'Light';
+        themeToggle.setAttribute('aria-pressed','true');
+      }else{
+        document.documentElement.classList.remove('theme-dark');
+        themeToggle.textContent = 'Dark';
+        themeToggle.setAttribute('aria-pressed','false');
+      }
+      try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+    }
+    themeToggle.addEventListener('click', ()=>{
+      const cur = document.documentElement.classList.contains('theme-dark') ? 'dark' : 'light';
+      applyTheme(cur === 'dark' ? 'light' : 'dark');
+    });
+
+    // Init theme from storage (default light)
+    try{
+      const saved = localStorage.getItem(THEME_KEY);
+      applyTheme(saved === 'dark' ? 'dark' : 'light');
+    }catch(e){ applyTheme('light'); }
+
+    // Initialize badges
+    setBadges('Latin','Cyrillic');
+
+    // Export some actions for convenience (optional)
+    window.risuzbek = {
+      convertToCyrillic, convertToLatin, swapAreas
+    };
+  })();
+</script>
+</body>
+</html>
